@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:wd-revenue="http://www.mulesoft.org/schema/mule/wd-revenue" 
+xmlns:http="http://www.mulesoft.org/schema/mule/http"
+xmlns:context="http://www.springframework.org/schema/context" 
+xmlns="http://www.mulesoft.org/schema/mule/core"
+xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" 
+xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.6.1"
+xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/wd-revenue http://www.mulesoft.org/schema/mule/wd-revenue/current/mule-wd-revenue.xsd">
+
+	<!-- This is the main configuration files, you should place here all the Connectors configuration an declarations -->
+
+	<context:property-placeholder
+		location="common.properties, mule.${mule.env}.properties" />
+
+	<smtp:gmail-connector name="gmailConnector"
+		doc:name="Gmail" validateConnections="true"
+		doc:description="This is the connector used to send email notifications. You should change its configuration to select a different email provider"
+		contentType="text/html" />
+
+	<http:listener-config name="HTTP_connector" host="0.0.0.0"
+		port="${http.port}" doc:name="HTTP" />
+
+	<sfdc:config name="Salesforce" username="${sfdc.username}"
+		password="${sfdc.password}" securityToken="${sfdc.securityToken}" url="${sfdc.url}"
+		doc:name="Salesforce"
+		doc:description="This is the source organization, where accounts will be migrated from.">
+		<sfdc:connection-pooling-profile
+			initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_GROW" />
+	</sfdc:config>
+    <wd-revenue:config name="Workday_Revenue_Management" revenueUser="${wday.user}" revenuePassword="${wday.password}" revenueEndpoint="${wday.endpoint}" doc:name="Workday Revenue Management">
+        <wd-revenue:connection-pooling-profile initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_GROW"/>
+    </wd-revenue:config>
+
+
+</mule>
