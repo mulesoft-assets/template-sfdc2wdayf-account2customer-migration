@@ -12,7 +12,6 @@
 <Field __artificialType="_id" __systemManaged="true" name="__id" type="string"/>
 <Field __index="0" __sourcePath="{}/Account/Id" containerType="SINGLE" label="Id" name="Id" type="string"/>
 <Field __index="1" __sourcePath="{}/Account/Name" containerType="SINGLE" label="Name" name="Name" type="string"/>
-<Field __index="3" __sourcePath="{}/Account/Phone" containerType="SINGLE" label="Phone" name="Phone" type="string"/>
 <Field __index="2" __sourcePath="{}/Account/Website" containerType="SINGLE" label="Website" name="Website" type="string"/>
 <Field __sourcePath="{}/Account/Industry" containerType="SINGLE" label="Industry" name="Industry" type="string"/>
 </Record>
@@ -927,7 +926,6 @@ Healthcare,CUSTOMER_CATEGORY-6-9
 <Context outPort="0" sequenceField="__id" xpath=".">
   <Mapping cloverField="Id" trim="true" xpath="Id"/>
   <Mapping cloverField="Name" trim="true" xpath="Name"/>
-  <Mapping cloverField="Phone" trim="true" xpath="Phone"/>
   <Mapping cloverField="Website" trim="true" xpath="Website"/>
   <Mapping cloverField="Industry" trim="true" xpath="Industry"/>
 </Context>
@@ -1660,7 +1658,7 @@ output.__id = input.__id;
 output.__parent_id = input.__id;
 //END -> DO NOT REMOVE
 output.type = "Customer_Category_ID";
-output.value = (isnull(lookup(IndustryToCustomerCategory).get([input.Industry])) ? "CUSTOMER_CATEGORY-3" : lookup(IndustryToCustomerCategory).get([input.Industry]).CustomerCategory);]]></attr>
+output.value = (isnull(lookup(IndustryToCustomerCategory).get([input.Industry])) ? "CUSTOMER_CATEGORY-3" : lookup(IndustryToCustomerCategory).get([input.Industry]]]><![CDATA[).CustomerCategory);]]></attr>
 </Node>
 <Node enabled="enabled" guiName="Foreach 'Account' -&gt; 'ID'" guiX="460" guiY="420" id="FOREACH_ACCOUNT_ID1" transformClass="com.mulesoft.datamapper.transform.MelRecordTransform" type="REFORMAT">
 <attr name="melScript"><![CDATA[if(!isnull(input.Website)){

@@ -40,8 +40,7 @@ http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mul
 				</enricher>
 			</batch:step>
 			<batch:step name="upsertWorkdayCustomer">
-				<logger message="Upserting Customer with ID:  #[payload.Id]"
-					level="INFO" doc:name="Log Upsert" />
+                <logger message="Upserting Customer with ID:  #[payload.Id], Name: #[payload.Name]" level="INFO" doc:name="Log Upsert"/>
 				<data-mapper:transform config-ref="Map_To_Pojo"
 					doc:name="Map To PutCustomersRequestType" />
 				<expression-component
