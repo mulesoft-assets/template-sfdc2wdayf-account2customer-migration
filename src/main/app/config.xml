@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smt
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
 http://www.mulesoft.org/schema/mule/wd-revenue http://www.mulesoft.org/schema/mule/wd-revenue/current/mule-wd-revenue.xsd">
 
-	<!-- This is the main configuration files, you should place here all the Connectors configuration an declarations -->
+	<!-- This is the main configuration files, you should place here all the Connectors configuration and declarations -->
 
 	<context:property-placeholder
 		location="common.properties, mule.${mule.env}.properties" />
@@ -37,7 +37,7 @@ http://www.mulesoft.org/schema/mule/wd-revenue http://www.mulesoft.org/schema/mu
 		<sfdc:connection-pooling-profile
 			initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_GROW" />
 	</sfdc:config>
-    <wd-revenue:config name="Workday_Revenue_Management" revenueUser="${wday.user}" revenuePassword="${wday.password}" revenueEndpoint="${wday.endpoint}" doc:name="Workday Revenue Management">
+    <wd-revenue:config name="Workday_Revenue_Management" revenueUser="${wdayf.user}" revenuePassword="${wdayf.password}" revenueEndpoint="${wdayf.endpoint}" doc:name="Workday Revenue Management">
         <wd-revenue:connection-pooling-profile initialisationPolicy="INITIALISE_ONE" exhaustedAction="WHEN_EXHAUSTED_GROW"/>
     </wd-revenue:config>
 

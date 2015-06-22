@@ -5,6 +5,7 @@
 + [Use Case](#usecase)
 + [Considerations](#considerations)
 	* [Salesforce Considerations](#salesforceconsiderations)
+	* [Workday Considerations](#workdayconsiderations)
 	* [Workday Financials Considerations](#workdayfinancialsconsiderations)
 + [Run it!](#runit)
 	* [Running on premise](#runonopremise)
@@ -88,7 +89,12 @@ column='486'
 
 
 
+## Workday Considerations <a name="workdayconsiderations"/>
 
+
+### As destination of data
+
+There are no particular considerations for this Anypoint Template regarding Workday as data destination.
 
 
 
@@ -184,9 +190,16 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 
 **Workday Connector configuration**
 
- + wday.user `wday_user`
- + wday.password `wday_password`
- + wday.endpoint `https://{your Workday domain}/ccx/service/{your tenant name}/Revenue_Management/v23.2`
+ + wdayf.user `wday_user`
+ + wdayf.password `wday_password`
+ + wdayf.endpoint `https://{your Workday domain}/ccx/service/{your tenant name}/Revenue_Management/v23.2`
+ 
+ + wdayf.country `USA`
+ + wdayf.state `USA-CA`
+ + wdayf.postalCode `90001`
+ + wdayf.city `San Francisco`
+ + wdayf.street `Main Street 123`
+ + wdayf.phone `123-4567`
 
 **SMTP Services configuration**
 

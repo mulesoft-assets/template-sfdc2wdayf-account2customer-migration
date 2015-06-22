@@ -25,7 +25,7 @@ http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mul
 	<batch:job name="migrateAccountsBatch">
 		<batch:threading-profile poolExhaustedAction="WAIT" />
 		<batch:input>
-            <sfdc:query config-ref="Salesforce" query="dsql:SELECT Id,Industry,Name,Website FROM Account WHERE NumberOfEmployees &gt; 50000" fetchSize="${page.size}" doc:name="query Accounts from Salesforce"/>
+            <sfdc:query config-ref="Salesforce" query="dsql:SELECT Id,Industry,Name,Website,BillingAddress,Phone FROM Account WHERE NumberOfEmployees &gt; 50000" fetchSize="${page.size}" doc:name="query Accounts from Salesforce"/>
 
 		</batch:input>
 		<batch:process-records>
@@ -42,7 +42,16 @@ http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mul
 			<batch:step name="upsertWorkdayCustomer">
                 <logger message="Upserting Customer with ID:  #[payload.Id], Name: #[payload.Name]" level="INFO" doc:name="Log Upsert"/>
 				<data-mapper:transform config-ref="Map_To_Pojo"
-					doc:name="Map To PutCustomersRequestType" />
+					doc:name="Map To PutCustomersRequestType" >
+                    <data-mapper:input-arguments>
+                        <data-mapper:input-argument key="phone">${wdayf.phone}</data-mapper:input-argument>
+                        <data-mapper:input-argument key="country">${wdayf.country}</data-mapper:input-argument>
+                        <data-mapper:input-argument key="street">${wdayf.street}</data-mapper:input-argument>
+                        <data-mapper:input-argument key="state">${wdayf.state}</data-mapper:input-argument>
+                        <data-mapper:input-argument key="city">${wdayf.city}</data-mapper:input-argument>
+                        <data-mapper:input-argument key="postalCode">${wdayf.postalCode}</data-mapper:input-argument>
+                    </data-mapper:input-arguments>
+                </data-mapper:transform>
 				<expression-component
 					doc:name="Add customer reference object if it already exists"><![CDATA[// if customer is already in Workday system, add customer reference object to payload to indicate update operation
 if( recordVars['wdayfCustomer'].responseResults.totalResults == 1 ) {
