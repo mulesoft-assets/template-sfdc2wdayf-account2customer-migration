@@ -86,19 +86,6 @@ column='486'
 ]
 ```
 
-
-
-
-## Workday Considerations <a name="workdayconsiderations"/>
-
-
-### As destination of data
-
-There are no particular considerations for this Anypoint Template regarding Workday as data destination.
-
-
-
-
 ## Workday Financials Considerations <a name="workdayfinancialsconsiderations"/>
 
 
@@ -109,11 +96,11 @@ Workday customer categories can be user defined, therefore the mapping must be e
 
 To view all the Workday Customer Categories, please type "customer categories" into search field in Workday system and select Customer Categories report.
 In the report you should see all the customer categories available. Select Integration IDs -> View Integration IDs from available actions of each customer 
-category and update the user-defined lookup table in the template's datamapper component manually.
-The default customer category ID can be edited in the Script view inside datamapper component. This category will be used if the source Account's Industry 
-value does not match any defined mappings in the lookup table.
+category and update the function *industryToCustomerCategoryMapping* in the template's DataWeave component 'Map to PutCustomerRequestType' manually.
+The default customer category ID can be edited inside the same DataWeave component in the row where customer category ID is set. This category will be used if the source Account's Industry 
+value does not match any defined mappings in the function.
 
-To find out more about DataMapper Lookup Tables, please read this [documentation page](http://www.mulesoft.org/documentation/display/current/Using+DataMapper+Lookup+Tables).
+To find out more about DataWeave, please read this [documentation page](https://docs.mulesoft.com/mule-user-guide/v/3.7/dataweave-reference-documentation).
 
 It is not possible to delete customer in Workday system. Therefore, integration test is based on update of test Account in Salesforce identified by property `sfdc.testaccount.id`. 
 Use the ID actually returned by the Salesforce connector. 
@@ -126,7 +113,7 @@ Whichever way you choose to run this template, this this is an example of the ou
 <h1>Batch Process initiated</h1>
 <b>ID:</b>6eea3cc6-7c96-11e3-9a65-55f9f3ae584e<br/>
 <b>Records to be processed: </b>3<br/>
-<b>Started execution on: </b>Tue Mar 24 16:08:16 CET 2015
+<b>Started execution on: </b>Wed Sep 30 16:08:16 CET 2015
 </pre>
 
 ## Running on premise <a name="runonopremise"/>
@@ -163,12 +150,12 @@ Once you have imported you Anypoint Template into Anypoint Studio you need to fo
 
 ### Running on Mule ESB stand alone <a name="runonmuleesbstandalone"/>
 Complete all properties in one of the property files, for example in [mule.prod.properties] (../master/src/main/resources/mule.prod.properties) and run your app with the corresponding environment variable to use it. To follow the example, this will be `mule.env=prod`. 
-
+After this, to trigger the use case you just need to hit the local HTTP connector with the port you configured in your file. If this is, for instance, `9090` then you should hit: `http://localhost:9090/migrateaccounts` and this will output a summary report and send it in the e-mail.
 
 ## Running on CloudHub <a name="runoncloudhub"/>
 While [creating your application on CloudHub](http://www.mulesoft.org/documentation/display/current/Hello+World+on+CloudHub) (Or you can do it later as a next step), you need to go to Deployment > Advanced to set all environment variables detailed in **Properties to be configured** as well as the **mule.env**.
 Once your app is all set up and started, supposing you choose as domain name `sfdcaccountmigration` to trigger the use 
-case you just need to hit `http://sfdcaccountmigration.cloudhub.io/migrateAccounts` and report will be sent to the emails configured.
+case you just need to hit `http://sfdcaccountmigration.cloudhub.io/migrateaccounts` and report will be sent to the emails configured.
 
 ### Deploying your Anypoint Template on CloudHub <a name="deployingyouranypointtemplateoncloudhub"/>
 Mule Studio provides you with really easy way to deploy your Template directly to CloudHub, for the specific steps to do so please check this [link](http://www.mulesoft.org/documentation/display/current/Deploying+Mule+Applications#DeployingMuleApplications-DeploytoCloudHub)
@@ -179,7 +166,8 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 ### Application configuration
 **Application configuration**
 
- + http.port `9090` 
+ + http.port `9090`
+ + page.size `200`
 
 **Salesforce Connector configuration**
 
@@ -192,7 +180,7 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 
  + wdayf.user `wday_user`
  + wdayf.password `wday_password`
- + wdayf.endpoint `https://{your Workday domain}/ccx/service/{your tenant name}/Revenue_Management/v23.2`
+ + wdayf.endpoint `https://{your Workday domain}/ccx/service/{your tenant name}/Revenue_Management/v23.1`
  
  + wdayf.country `USA`
  + wdayf.state `USA-CA`
@@ -246,14 +234,14 @@ This flow has Exception Strategy that basically consists of invoking the *defaul
 
 ## endpoints.xml<a name="endpointsxml"/>
 This is the file where you will find the inbound side of your integration app.
-This template has only a [HTTP Connector](http://www.mulesoft.org/documentation/display/current/HTTP+Connector) as the way to trigger the use case.
+This Template has only an [HTTP Listener Connector](http://www.mulesoft.org/documentation/display/current/HTTP+Listener+Connector) as the way to trigger the use case.
 
-**HTTP Connector** - Start Report Generation
+**HTTP Listener Connector** - Start Report Generation
 
- + `${http.port}` is set as a property to be defined either on a property file or in CloudHub environment variables.
- + The path configured by default is `migrateAccounts` and you are free to change it for the one that you prefer.
- + The host name for all endpoints in your CloudHub configuration should be defined as `0.0.0.0`. CloudHub will then route requests from your application domain URL to the endpoint.
- + The endpoint is configured as a *request-response* by placing it in the source section of the flow. The response will be the summary of Batch Input stage - number of Accounts loaded by the criteria specified.
++ `${http.port}` is set as a property to be defined either on a property file or in CloudHub environment variables.
++ The path configured by default is `migrateaccounts` and you are free to change for the one you prefer.
++ The host name for all endpoints in your CloudHub configuration should be defined as `localhost`. CloudHub will then route requests from your application domain URL to the endpoint.
++ The endpoint is a *request-response* since as a result of calling it the response will be the total of Accounts synced and filtered by the criteria specified.
 
 
 

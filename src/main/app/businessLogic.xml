@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
-	xmlns:data-mapper="http://www.mulesoft.org/schema/mule/ee/data-mapper"
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
 	xmlns:wd-revenue="http://www.mulesoft.org/schema/mule/wd-revenue"
 	xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc"
 	xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.6.2"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.7.2"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
@@ -17,10 +16,8 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
 http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
 http://www.mulesoft.org/schema/mule/wd-revenue http://www.mulesoft.org/schema/mule/wd-revenue/current/mule-wd-revenue.xsd
-http://www.mulesoft.org/schema/mule/ee/data-mapper http://www.mulesoft.org/schema/mule/ee/data-mapper/current/mule-data-mapper.xsd
-http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
-	<data-mapper:config name="Map_To_Pojo"
-		transformationGraphPath="map_to_pojo.grf" doc:name="Map_To_Pojo" />
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
 
 	<batch:job name="migrateAccountsBatch">
 		<batch:threading-profile poolExhaustedAction="WAIT" />
@@ -30,34 +27,144 @@ http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mul
 		</batch:input>
 		<batch:process-records>
 			<batch:step name="getCustomerInWorkdayStep">
-				<enricher doc:name="store in recordVar 'wdayfCustomer'"
-					source="#[payload]" target="#[recordVars['wdayfCustomer']]">
+				<enricher doc:name="enrich payload with wdayfCustomerReference"
+					source="#[payload == null ? null : payload.responseData[0].customer[0].customerReference]" target="#[payload.wdayfCustomerReference]">
 					<processor-chain doc:name="Get existing">
+                        <dw:transform-message doc:name="Create GetCustomers Request">
+                            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	requestCriteria: [{
+		customerReferenceID: payload.Id
+	}],
+	responseGroup: [{
+		includeCustomerData: true,
+		includeReference: true
+	}]
+} as :object {
+	class : "com.workday.revenue.GetCustomersRequestType"
+}]]></dw:set-payload>
+                        </dw:transform-message>
 						<wd-revenue:get-customers config-ref="Workday_Revenue_Management"
 							doc:name="Get Customer by ID"
-							getCustomersRequest-ref="#[org.mule.templates.CustomerRequest.createByID(payload[&quot;Id&quot;])]" />
+							 />
 					</processor-chain>
 				</enricher>
 			</batch:step>
 			<batch:step name="upsertWorkdayCustomer">
                 <logger message="Upserting Customer with ID:  #[payload.Id], Name: #[payload.Name]" level="INFO" doc:name="Log Upsert"/>
-				<data-mapper:transform config-ref="Map_To_Pojo"
-					doc:name="Map To PutCustomersRequestType" >
-                    <data-mapper:input-arguments>
-                        <data-mapper:input-argument key="phone">${wdayf.phone}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="country">${wdayf.country}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="street">${wdayf.street}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="state">${wdayf.state}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="city">${wdayf.city}</data-mapper:input-argument>
-                        <data-mapper:input-argument key="postalCode">${wdayf.postalCode}</data-mapper:input-argument>
-                    </data-mapper:input-arguments>
-                </data-mapper:transform>
-				<expression-component
-					doc:name="Add customer reference object if it already exists"><![CDATA[// if customer is already in Workday system, add customer reference object to payload to indicate update operation
-if( recordVars['wdayfCustomer'].responseResults.totalResults == 1 ) {
-	payload.customerReference = recordVars['wdayfCustomer'].responseData[0].customer[0].customerReference
-}
-]]></expression-component>
+                <dw:transform-message doc:name="Map to PutCustomerRequestType">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%function countryMapping(salesforceCountry) {
+	(workdayCountry: 'USA') when salesforceCountry == 'USA'
+} unless salesforceCountry is :null otherwise workdayCountry: p('wdayf.country')
+
+%function industryToCustomerCategoryMapping(industry) {
+	(customerCategory: 'CUSTOMER_CATEGORY-6') when industry == 'Biotechnology',
+	(customerCategory: 'CUSTOMER_CATEGORY-7') when industry == 'Retail',
+	(customerCategory: 'CUSTOMER_CATEGORY-4-8') when industry == 'Manufacturing',
+	(customerCategory: 'CUSTOMER_CATEGORY-4') when industry == 'Hospitality',
+	(customerCategory: 'CUSTOMER_CATEGORY-5') when industry == 'Technology',
+	(customerCategory: 'CUSTOMER_CATEGORY-1') when industry == 'Finance',
+	(customerCategory: 'CUSTOMER_CATEGORY-6-9') when industry == 'Healthcare'
+} unless industry is :null otherwise customerCategory: "CUSTOMER_CATEGORY-3"
+
+%function stateMapping(salesforceState) {
+	(workdayState: 'USA-CA') when salesforceState == 'CA'
+} unless salesforceState is :null otherwise workdayState: p('wdayf.state')
+
+%output application/java
+---
+{
+	customerData: {
+		businessEntityData: {
+			businessEntityName: payload.Name,
+			contactData: {
+				addressData: [{
+					addressLineData: [{
+						type: "ADDRESS_LINE_1",
+						value: payload.BillingAddress.street default p('wdayf.street')
+					}],
+					countryReference: {
+						ID: [{
+							type: "ISO_3166-1_Alpha-3_Code",
+							value: countryMapping(payload.BillingAddress.country).workdayCountry default p('wdayf.country')
+						}]
+					},
+					countryRegionReference: {
+						ID: [{
+							type: "Country_Region_ID",
+							value: stateMapping(payload.BillingAddress.state).workdayState default p('wdayf.state')
+						}]
+					},
+					effectiveDate: payload.LastModifiedDate,
+					municipality: payload.BillingAddress.city default p('wdayf.city'),
+					postalCode: payload.BillingAddress.postalCode default p('wdayf.postalCode'),
+					usageData: [{
+						public: false,
+						typeData: [{
+							primary: true,
+							typeReference: {
+								ID: [{
+									type: "Communication_Usage_Type_ID",
+									value: "BUSINESS"
+								}]
+							}
+						}]
+					}]
+				}],
+				phoneData: [{
+					phoneDeviceTypeReference: {
+						ID: [{
+							type: "Phone_Device_Type_ID",
+							value: "1063.5"
+						}]
+					},
+					phoneNumber: payload.Phone default p('wdayf.phone'),
+					usageData: [{
+						public: true,
+						typeData: [{
+							primary: true,
+							typeReference: {
+								ID: [{
+									type: "Communication_Usage_Type_ID",
+									value: "BUSINESS"
+								}]
+							}
+						}]
+					}]
+				}],
+				(webAddressData: [{
+					usageData: [{
+						typeData: [{
+							primary: true,
+							typeReference: {
+								ID: [{
+									type: "Communication_Usage_Type_ID",
+									value: "BUSINESS"
+								}]
+							}
+						}]
+					}],
+					webAddress: payload.Website when (payload.Website matches /http(s)?:\/\/.*/)  otherwise "http://" ++ payload.Website
+				}]) when payload.Website != null
+			}
+		},
+		customerCategoryReference: {
+			ID: [{
+				type: "Customer_Category_ID",
+				value: industryToCustomerCategoryMapping(payload.Industry).customerCategory default "CUSTOMER_CATEGORY-3"
+			}]
+		},
+		customerName: payload.Name,
+		customerReferenceID: payload.Id
+	},
+	customerReference: payload.wdayfCustomerReference
+} as :object {
+	class : "com.workday.revenue.PutCustomerRequestType"
+}]]></dw:set-payload>
+                </dw:transform-message>
 				<wd-revenue:put-customer config-ref="Workday_Revenue_Management"
 					doc:name="Upsert Customer" />
 			</batch:step>
