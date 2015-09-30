@@ -38,6 +38,8 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 
 	private static final String PATH_TO_TEST_PROPERTIES = "./src/test/resources/mule.test.properties";
 	protected static final int TIMEOUT_SECONDS = 300;
+	private static final String POSTAL_CODE = "90210";
+	private static final String PHONE = "123-4567";
 	private SubflowInterceptingChainLifecycleWrapper UPDATE_ACCOUNT_FLOW;
 	private SubflowInterceptingChainLifecycleWrapper RETRIEVE_CUSTOMER_FLOW;
 	private String SFDC_TEST_ACCOUNT_ID;
@@ -85,8 +87,8 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 		Map<String, Object> account = SfdcObjectBuilder.anAccount()
 				.with("Id", SFDC_TEST_ACCOUNT_ID).with("Name", name)
 				.with("Website", website)
-				.with("BillingPostalCode", "90210")
-				.with("Phone", "123-4567").build();
+				.with("BillingPostalCode", POSTAL_CODE)
+				.with("Phone", PHONE).build();
 		List<Map<String, Object>> payload = new ArrayList<>();
 		payload.add(account);
 
@@ -129,10 +131,10 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 		assertEquals("The phone should be the same", response.getResponseData()
 				.get(0).getCustomer().get(0).getCustomerData()
 				.getBusinessEntityData().getContactData()
-				.getPhoneData().get(0).getPhoneNumber(), "123-4567");
+				.getPhoneData().get(0).getPhoneNumber(), PHONE);
 		assertEquals("The postal code should be the same", response.getResponseData().get(0)
 				.getCustomer().get(0).getCustomerData()
-				.getBusinessEntityData().getContactData().getAddressData().get(0).getPostalCode(), "90210");
+				.getBusinessEntityData().getContactData().getAddressData().get(0).getPostalCode(), POSTAL_CODE);
 	}
 
 	/**

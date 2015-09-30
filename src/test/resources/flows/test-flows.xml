@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:wd-revenue="http://www.mulesoft.org/schema/mule/wd-revenue" 
+<mule xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:wd-revenue="http://www.mulesoft.org/schema/mule/wd-revenue" 
 xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc" 
 xmlns="http://www.mulesoft.org/schema/mule/core" 
 xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" 
 xmlns:spring="http://www.springframework.org/schema/beans" 
-version="EE-3.6.2" 
+version="EE-3.7.2" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/sfdc http://www.mulesoft.org/schema/mule/sfdc/current/mule-sfdc.xsd
-http://www.mulesoft.org/schema/mule/wd-revenue http://www.mulesoft.org/schema/mule/wd-revenue/current/mule-wd-revenue.xsd">
+http://www.mulesoft.org/schema/mule/wd-revenue http://www.mulesoft.org/schema/mule/wd-revenue/current/mule-wd-revenue.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
     <sub-flow name="retrieveCustomersFlow">
-        <wd-revenue:get-customers config-ref="Workday_Revenue_Management"  doc:name="Workday Revenue Management" getCustomersRequest-ref="#[org.mule.templates.CustomerRequest.createByID(payload)]"/>
+        <dw:transform-message doc:name="Create GetCustomers Request">
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+{
+	requestCriteria: [{
+		customerReferenceID: payload
+	}],
+	responseGroup: [{
+		includeCustomerData: true,
+		includeReference: true
+	}]
+} as :object {
+	class : "com.workday.revenue.GetCustomersRequestType"
+}]]></dw:set-payload>
+        </dw:transform-message>
+        <wd-revenue:get-customers config-ref="Workday_Revenue_Management"  doc:name="Workday Revenue Management" />
     </sub-flow>
     <sub-flow name="updateAccountFlow">
         <sfdc:update config-ref="Salesforce" type="Account" doc:name="update Account">
