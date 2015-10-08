@@ -6,7 +6,7 @@
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:sfdc="http://www.mulesoft.org/schema/mule/sfdc"
 	xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:json="http://www.mulesoft.org/schema/mule/json"
-	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.7.2"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
@@ -52,7 +52,7 @@ http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee
 					</processor-chain>
 				</enricher>
 			</batch:step>
-			<batch:step name="upsertWorkdayCustomer">
+			<batch:step name="upsertWorkdayCustomerStep">
                 <logger message="Upserting Customer with ID:  #[payload.Id], Name: #[payload.Name]" level="INFO" doc:name="Log Upsert"/>
                 <dw:transform-message doc:name="Map to PutCustomerRequestType">
                     <dw:set-payload><![CDATA[%dw 1.0

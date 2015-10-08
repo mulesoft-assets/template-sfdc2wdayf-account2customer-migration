@@ -3,5 +3,5 @@
     <name>template-sfdc2wdayf-account2customer-migration-1.2.0-SNAPSHOT</name>
     <description></description>
     <muleExtension name="Salesforce" qualifier="org.mule.tooling.ui.contribution.sfdc.3.5.0"/>
-    <muleExtension name="Workday Revenue Management" qualifier="org.mule.tooling.ui.contribution.wd-revenue"/>
+    <muleExtension name="Workday Revenue Management" qualifier="org.mule.tooling.ui.contribution.wd-revenue.3.5.0"/>
 </mule-project>
