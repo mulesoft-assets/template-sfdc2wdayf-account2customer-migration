@@ -86,6 +86,19 @@ column='486'
 ]
 ```
 
+
+
+
+## Workday Considerations <a name="workdayconsiderations"/>
+
+
+### As destination of data
+
+There are no particular considerations for this Anypoint Template regarding Workday as data destination.
+
+
+
+
 ## Workday Financials Considerations <a name="workdayfinancialsconsiderations"/>
 
 
@@ -113,7 +126,7 @@ Whichever way you choose to run this template, this this is an example of the ou
 <h1>Batch Process initiated</h1>
 <b>ID:</b>6eea3cc6-7c96-11e3-9a65-55f9f3ae584e<br/>
 <b>Records to be processed: </b>3<br/>
-<b>Started execution on: </b>Wed Sep 30 16:08:16 CET 2015
+<b>Started execution on: </b>Mon Jan 25 10:08:16 CET 2016
 </pre>
 
 ## Running on premise <a name="runonopremise"/>
@@ -179,8 +192,9 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 **Workday Connector configuration**
 
  + wdayf.user `wday_user`
+ + wdayf.tenant `your_tenant_name`
  + wdayf.password `wday_password`
- + wdayf.endpoint `https://{your Workday domain}/ccx/service/{your tenant name}/Revenue_Management/v23.1`
+ + wdayf.hostname `your_impl-cc.workday.com`
  
  + wdayf.country `USA`
  + wdayf.state `USA-CA`
@@ -196,7 +210,7 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
  + smtp.user `gmail_user`
  + smtp.password `gmail_password`
 
-**EMail Details**
+**Email Details**
 
  + mail.from `batch.migrateaccounts.migration%40mulesoft.com`
  + mail.to `your.email@example.com`
