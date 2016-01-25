@@ -24,7 +24,6 @@ import org.mule.tck.junit4.rule.DynamicPort;
 import org.mule.templates.builders.SfdcObjectBuilder;
 
 import com.mulesoft.module.batch.BatchTestHelper;
-import com.workday.revenue.GetCustomersResponseType;
 
 /**
  * The objective of this class is to validate the correct behavior of the Mule
@@ -115,26 +114,14 @@ public class BusinessLogicIT extends AbstractTemplateTestCase {
 
 		MuleEvent event = RETRIEVE_CUSTOMER_FLOW.process(getTestEvent(
 				SFDC_TEST_ACCOUNT_ID, MessageExchangePattern.REQUEST_RESPONSE));
-		GetCustomersResponseType response = (GetCustomersResponseType) event
-				.getMessage().getPayload();
+		Map<String, Object> response = (Map<String, Object>) event.getMessage().getPayload();
 
 		// assertions
-		assertEquals("Workday should return one result", 1, response
-				.getResponseResults().get(0).getTotalResults().intValue());
-		assertEquals("The website should be the same", website, response
-				.getResponseData().get(0).getCustomer().get(0)
-				.getCustomerData().getBusinessEntityData().getContactData()
-				.getWebAddressData().get(0).getWebAddress());
-		assertEquals("The name should be the same", name, response
-				.getResponseData().get(0).getCustomer().get(0)
-				.getCustomerData().getCustomerName());
-		assertEquals("The phone should be the same", response.getResponseData()
-				.get(0).getCustomer().get(0).getCustomerData()
-				.getBusinessEntityData().getContactData()
-				.getPhoneData().get(0).getPhoneNumber(), PHONE);
-		assertEquals("The postal code should be the same", response.getResponseData().get(0)
-				.getCustomer().get(0).getCustomerData()
-				.getBusinessEntityData().getContactData().getAddressData().get(0).getPostalCode(), POSTAL_CODE);
+		assertEquals("Workday should return one result", 1, response.get("TotalResults"));
+		assertEquals("The website should be the same", website, response.get("WebAddress"));
+		assertEquals("The name should be the same", name, response.get("CustomerName"));
+		assertEquals("The phone should be the same", PHONE, response.get("PhoneNumber"));
+		assertEquals("The postal code should be the same", POSTAL_CODE, response.get("PostalCode"));
 	}
 
 	/**
