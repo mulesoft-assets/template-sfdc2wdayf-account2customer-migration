@@ -4,12 +4,8 @@
 	<parent>
 		<groupId>org.mule.templates</groupId>
 		<artifactId>templates-tooling-parent-pom</artifactId>
-		<version>1.2.7</version>
+		<version>1.2.8</version>
 	</parent>
-	
-	<properties>
-		<wday.version>7.0.0</wday.version>
-	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>template-sfdc2wdayf-account2customer-migration</artifactId>

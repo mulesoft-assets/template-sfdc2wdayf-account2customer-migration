@@ -41,7 +41,7 @@ http://www.mulesoft.org/schema/mule/wd-connector http://www.mulesoft.org/schema/
 	PhoneNumber: payload.ns0#Get_Customers_Response.ns0#Response_Data.ns0#Customer.ns0#Customer_Data.ns0#Business_Entity_Data.ns0#Contact_Data.ns0#Phone_Data.ns0#Phone_Number,
 	WebAddress: payload.ns0#Get_Customers_Response.ns0#Response_Data.ns0#Customer.ns0#Customer_Data.ns0#Business_Entity_Data.ns0#Contact_Data.ns0#Web_Address_Data.ns0#Web_Address,
 	PostalCode: payload.ns0#Get_Customers_Response.ns0#Response_Data.ns0#Customer.ns0#Customer_Data.ns0#Business_Entity_Data.ns0#Contact_Data.ns0#Address_Data.ns0#Postal_Code
-}]]></dw:set-payload>
+} when payload.ns0#Get_Customers_Response.ns0#Response_Results.ns0#Total_Results != 0 otherwise []]]></dw:set-payload>
         </dw:transform-message>
     </sub-flow>
     <sub-flow name="updateAccountFlow">
