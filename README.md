@@ -191,9 +191,9 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
 
 **Workday Connector configuration**
 
- + wdayf.user `wday_user`
- + wdayf.tenant `your_tenant_name`
- + wdayf.password `wday_password`
+ + wdayf.user `joan`
+ + wdayf.tenant `acme_pt1`
+ + wdayf.password `joanPass123`
  + wdayf.hostname `your_impl-cc.workday.com`
  
  + wdayf.country `USA`
