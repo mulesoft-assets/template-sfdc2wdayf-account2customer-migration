@@ -16,7 +16,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
             <http:response-builder statusCode="200"/>
         </http:listener>
 
-        <flow-ref name="mainFlow" doc:name="run mainFlow"/>
+        <flow-ref name="mainFlow" doc:name="Run mainFlow"/>
         <set-payload value="&lt;h1&gt;Batch Process initiated&lt;/h1&gt;&lt;b&gt;ID:&lt;/b&gt;#[payload.getId()]&lt;br/&gt;&lt;b&gt;Records to Be Processed: &lt;/b&gt;#[payload.getRecordCount()]&lt;br/&gt; &lt;b&gt;Start execution on: &lt;/b&gt;#[new java.util.Date()]" doc:name="Set Batch Status response Payload"/>
     </flow>
     
