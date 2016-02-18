@@ -10,14 +10,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>template-sfdc2wdayf-account2customer-migration</artifactId>
 	<packaging>mule</packaging>
-	<version>1.2.1</version>
+	<version>1.2.2-SNAPSHOT</version>
 	<name>template-sfdc2wdayf-account2customer-migration Anypoint Template Project</name>
 
 	<scm>
 		<connection>scm:git:https://github.com/mulesoft/template-sfdc2wdayf-account2customer-migration.git</connection>
 		<developerConnection>scm:git:https://github.com/mulesoft/template-sfdc2wdayf-account2customer-migration.git</developerConnection>
 		<url>https://github.com/mulesoft/template-sfdc2wdayf-account2customer-migration</url>
-		<tag>v1.2.1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<build>
