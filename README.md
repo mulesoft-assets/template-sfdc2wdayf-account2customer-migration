@@ -180,14 +180,13 @@ In order to use this Mule Anypoint Template you need to configure properties (Cr
  + sfdc.username `bob.dylan@orga`
  + sfdc.password `DylanPassword123`
  + sfdc.securityToken `avsfwCUl7apQs56Xq2AKi3X`
- + sfdc.url `https://login.salesforce.com/services/Soap/u/32.0`
 
 **Workday Connector configuration**
 
- + wdayf.user `joan`
+ + wdayf.username `joan`
  + wdayf.tenant `acme_pt1`
  + wdayf.password `joanPass123`
- + wdayf.hostname `your_impl-cc.workday.com`
+ + wdayf.host `your_impl-cc.workday.com`
  
  + wdayf.country `USA`
  + wdayf.state `USA-CA`
