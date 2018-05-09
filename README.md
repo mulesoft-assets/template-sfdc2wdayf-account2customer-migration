@@ -36,7 +36,7 @@ As implemented, this template leverages the [Batch Module](http://www.mulesoft.o
 The batch job is divided into *Process* and *On Complete* stages.
 
 Firstly the template will query all the existing Accounts at Salesforce that match the filtering criteria.
-In the *Process* stage, the template queries the Workday for already existing customers based on the Salesforce IDs retrieved in the *Input* stage.
+In the *Process* stage, the template queries the Workday for already existing customers based on the Salesforce IDs retrieved before the batch processing.
 The customers get inserted or updated in the Workday system based on the results of these queries.
 Lastly, the information about the migration results is sent to pre-configured e-mail recipient and output to the console as well.
 
