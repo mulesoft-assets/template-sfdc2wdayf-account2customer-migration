@@ -31,11 +31,6 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-objectstore-connector</artifactId>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
 			<groupId>com.mulesoft.connectors</groupId>
 			<artifactId>mule-workday-connector</artifactId>
 			<classifier>mule-plugin</classifier>

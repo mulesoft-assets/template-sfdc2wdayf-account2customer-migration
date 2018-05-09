@@ -12,7 +12,7 @@ This template should serve as a foundation for the process of migrating accounts
 and desired behavior when the corresponding Customer already exists in Workday.
 
 As implemented, this template leverages the [Batch Module](http://www.mulesoft.org/documentation/display/current/Batch+Processing).
-The batch job is divided into *Input*, *Process* and *On Complete* stages.
+The batch job is divided into *Process* and *On Complete* stages.
 
 Firstly the template will query all the existing Accounts at Salesforce that match the filtering criteria.
 In the *Process* stage, the template queries the Workday for already existing customers based on the Salesforce IDs retrieved in the *Input* stage.
