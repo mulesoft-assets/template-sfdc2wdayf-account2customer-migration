@@ -15,13 +15,6 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/workday/current/mule-workday.xsd">
 
 	<flow name="businessLogicFlow" doc:id="884f86c5-66e1-4701-bb9b-594c2a60abf3">
-		<salesforce:query doc:name="Select Accounts from SFDC"
-			doc:id="5de63d1d-1f78-4eec-8ed6-dd7cb05280da" config-ref="Salesforce_Config">
-			<salesforce:salesforce-query>SELECT
-				Id,Industry,Name,Website,BillingAddress,Phone FROM Account WHERE
-				NumberOfEmployees &gt; 50000
-			</salesforce:salesforce-query>
-		</salesforce:query>
 		<batch:job jobName="migrateObjectsBatch" doc:id="79b373e6-1aeb-43a9-9dfe-8ac0d2f31fdc">
 			<batch:process-records>
 				<batch:step name="getCustomerFromWorkdayStep" doc:id="232087de-e311-49c1-a890-439c65ea1af2">
@@ -34,23 +27,24 @@ output application/xml
 ns ns0 urn:com.workday/bsvc
 ---
 {
-	ns0#Get_Customers_Request: {
-		ns0#Request_Criteria: {
-			ns0#Customer_Reference_ID: payload.Id
-		},
-		ns0#Response_Group: {
-			ns0#Include_Reference: true,
-			ns0#Include_Customer_Data: true
-		}
-	}
+    ns0#Get_Customers_Request: {
+        ns0#Request_References: {
+            ns0#Customer_Reference: {
+                ns0#ID @(ns0#"type": "Customer_Reference_ID" ): payload.Id
+            }
+        },
+        ns0#Response_Group: {
+            ns0#Include_Reference    : true,
+            ns0#Include_Customer_Data: true
+        }
+    }
 }]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-					<workday:invoke doc:name="Invoke" doc:id="6a07e811-023b-45d7-83dd-b3d7dc0804bb" config-ref="Workday_Config" service="Revenue_Management" operation="Get_Customers" target="getCustomerResponse">
-						<workday:message >
-							<workday:body ><![CDATA[#[vars.getCustomerRequest]]]></workday:body>
-						</workday:message>
-					</workday:invoke>
+					<workday:revenue-management doc:name="Revenue management - Get Customers" doc:id="acf9fa0c-bb76-4c54-ac5a-28121d247e43" config-ref="Workday_Config_version_30" target="getCustomerResponse" operation="Get_Customers">
+						<ee:repeatable-file-store-stream inMemorySize="2048" />
+						<workday:content ><![CDATA[#[vars.getCustomerRequest]]]></workday:content>
+					</workday:revenue-management>
 					<ee:transform doc:name="Prepare Workday Customer Reference" doc:id="0e44967e-228c-48ab-a08d-cf1036662e9e" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
@@ -156,7 +150,7 @@ fun stateMapping(salesforceState) =
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<workday:invoke service="Revenue_Management" operation="Submit_Customer" doc:name="Invoke" doc:id="c7c928f5-567c-434f-9ea1-83c2ab298a47" config-ref="Workday_Config"/>
+					<workday:revenue-management operation="Submit_Customer" doc:name="Revenue management - Submit Customer" doc:id="fe94fcc8-58f4-4adb-9197-277a1dc4ec19" config-ref="Workday_Config_version_30"/>
             </batch:step>
         </batch:process-records>
         <batch:on-complete >
@@ -165,12 +159,11 @@ fun stateMapping(salesforceState) =
                     <logger level="INFO" doc:name="Migration process has finished!" doc:id="b7575d38-7dbd-4602-9186-1bbb25234896" message="Migration process has finished!" />
                 </route>
                 <route>
-                    <ee:transform doc:name="Prepare migration result email"
-                                  doc:id="c84b4bc4-5a65-41c1-9d0c-f1ebd3d8db7a">
-                        <ee:message>
-                            <ee:set-payload><![CDATA[%dw 2.0
- output text/plain
- ---
+                    <ee:transform doc:name="Prepare migration result email" doc:id="d55c25e1-4f6d-4b2d-b6f5-3d80f14d1747" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
  "Migration Report: \n"
 
  ++ "\n Time [milliseconds]: " 		++ payload.elapsedTimeInMillis!
@@ -178,10 +171,10 @@ fun stateMapping(salesforceState) =
  ++ "\n Successful Records: "		++ payload.successfulRecords!
  ++ "\n Failed Records: "			++ payload.failedRecords!
  ++ "\n Loaded Records: "			++ payload.loadedRecords!
- ++ "\n Processed Records: " 		++ payload.processedRecords!]]></ee:set-payload>
-                        </ee:message>
-                    </ee:transform>
-                    <email:send config-ref="Gmail_SMTP" doc:name="Send migration result email"
+ ++ "\n Processed Records: " 		++ payload.processedRecords! ]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<email:send config-ref="Gmail_SMTP" doc:name="Send migration result email"
                                 doc:id="5896eaa9-dd10-47a2-a6fc-6319b11dbd06" fromAddress="${mail.from}"
                                 subject="${mail.subject}">
                         <email:to-addresses>
@@ -194,7 +187,10 @@ fun stateMapping(salesforceState) =
     </batch:job>
 </flow>
 <flow name="mainFlow" doc:id="7c0a5bef-b3d5-442f-bff3-10d038f69a5e" >
-    <flow-ref doc:name="businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
+    <salesforce:query doc:name="Select Accounts from SFDC" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query>SELECT Id,Industry,Name,Website,BillingAddress,Phone FROM Account WHERE NumberOfEmployees &gt; 50000</salesforce:salesforce-query>
+		</salesforce:query>
+		<flow-ref doc:name="businessLogicFlow" doc:id="91360ede-4d71-44c7-9b64-8ee762e04ea0" name="businessLogicFlow"/>
     <error-handler >
         <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="488b507d-e26c-4c56-8759-8bb4f6645d71" type="ANY">
             <flow-ref doc:name="errorHandlingFlow" doc:id="afdaf73c-0137-4d60-84f6-5c41234771a3" name="errorHandlingFlow" />

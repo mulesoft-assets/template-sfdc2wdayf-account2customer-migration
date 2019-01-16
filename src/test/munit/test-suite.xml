@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:workday="http://www.mulesoft.org/schema/mule/workday"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd 
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/workday/current/mule-workday.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<munit:config name="test-suite.xml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="97222439-712b-48f0-98d2-17bb4ea46ece" file="mule.test.properties" />
+	<munit:before-test name="test-suiteBefore_Test" description="Before tests actions" doc:id="227b5230-0348-4c38-9be1-4849fc0a6d9a">
+		<munit-tools:mock-when doc:name="Mock email processor to avoid sending email"
+			doc:id="2b5598df-93cb-4d24-9626-e9956797f774" processor="email:send">
+			<munit-tools:then-return />
+		</munit-tools:mock-when>
+	</munit:before-test>
+	<munit:test name="test-suiteTest" description="MUnit Test" doc:id="d76ec2c4-5b77-4960-850a-fd20e2dc1325" >
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to prepareDynamicDataInput" doc:id="ef4e4da3-80d0-49b2-848a-2849e69d0970" name="prepareDynamicDataInput"/>
+			<flow-ref doc:name="Flow-ref to businessLogicFlow" doc:id="a64a050f-08ca-4e0a-94c7-062ceacb35fb" name="businessLogicFlow"/>
+			<scripting:execute engine="groovy" doc:name="Sleep for 1m until the processing is completed" doc:id="0db05c45-3a5f-4d0a-a13f-b2adff990788" >
+				<scripting:code >sleep(60000)</scripting:code>
+			</scripting:execute>
+					<ee:transform doc:name="Prepare Get Customer Request" doc:id="899dfcad-2fab-4276-a4ea-10b162515642" >
+						<ee:message >
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="getCustomerRequest" ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 urn:com.workday/bsvc
+---
+{
+	ns0#Get_Customers_Request: {
+		ns0#Request_References: {
+			ns0#Customer_Reference: {
+				ns0#ID @(ns0#"type": "Customer_Reference_ID" ): vars.AccountVar.Account.Id
+			}
+		},
+		ns0#Response_Group: {
+			ns0#Include_Customer_Data: true
+		}
+	}
+}]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+					<workday:revenue-management doc:name="Revenue management - Get Customers" config-ref="Workday_Config_version_30" operation="Get_Customers">
+						<ee:repeatable-file-store-stream inMemorySize="2048" />
+						<workday:content ><![CDATA[#[vars.getCustomerRequest]]]></workday:content>
+					</workday:revenue-management>
+			<ee:transform doc:name="Transform Output to JSON" doc:id="86e0395e-8368-44b6-867b-cc7f7321e835">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		
+</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7b925592-bb91-44bd-8b1c-924631fdcc36" expression="#[payload.Get_Customers_Response.Response_Data.Customer.Customer_Data.Customer_Name]" is="#[MunitTools::equalTo(vars.AccountVar.Account.Name)]"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a6388fd1-e35a-4fbc-96cc-7cd8be2e805d" expression="#[payload.Get_Customers_Response.Response_Data.Customer.Customer_Data.Business_Entity_Data.Contact_Data.Phone_Data.Phone_Number]" is="#[MunitTools::equalTo(vars.AccountVar.Account.Phone)]"/>
+		</munit:validation>
+	</munit:test>
+	<sub-flow name="prepareDynamicDataInput" doc:id="2f86f4ba-02c9-4871-b5dc-082605d3a90b">
+		<ee:transform doc:name="Prepare dynamic testing variable - also used for assertions" doc:id="d43ca24e-5bb5-4198-be33-59c9fd1fcf35" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="AccountVar" ><![CDATA[%dw 2.0
+output application/java
+---
+Account : {
+	Id: '0010J00001zJT99QAG',
+	Phone: '100' ++ randomInt(100000),
+	Name: "Test_AccToInsert_account-migration_" ++ uuid()
+}
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Prepare test payload" doc:id="1a33ae9d-9630-4b7a-9de8-96500b93a465" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	Id : vars.AccountVar.Account.Id,
+	Industry: 'Biology',
+	BillingAddress : {
+		country: null,
+		city: 'Las Vegas',
+		countryCode: null,
+		street: 'street0A_account-broadcast_6210f1b0-7936-11e4-9a04-c81f66d44d3c',
+		latitude: null,
+		postalCode: null,
+		geocodeAccuracy:null,
+		stateCode: null,
+		state: null,
+		longitude: null
+	},
+	Name: vars.AccountVar.Account.Name,
+	Website: 'http://acme.org',
+	Phone : vars.AccountVar.Account.Phone
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+</sub-flow>
+
+
+</mule>
