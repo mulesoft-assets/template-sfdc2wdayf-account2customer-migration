@@ -76,7 +76,7 @@ payload]]></ee:set-payload>
 output application/java
 ---
 Account : {
-	Id: '0010J00001zJT99QAG',
+	Id: p('test.sfdc.account.id'),
 	Phone: p('test.wdayf.phone'),
 	Name: "Test_AccToInsert_account-migration_" ++ uuid()
 }
@@ -91,18 +91,6 @@ output application/java
 [{
 	Id : vars.AccountVar.Account.Id,
 	Industry: 'Biology',
-	BillingAddress : {
-		country: null,
-		city: 'Las Vegas',
-		countryCode: null,
-		street: 'street0A_account-broadcast_6210f1b0-7936-11e4-9a04-c81f66d44d3c',
-		latitude: null,
-		postalCode: null,
-		geocodeAccuracy:null,
-		stateCode: null,
-		state: null,
-		longitude: null
-	},
 	Name: vars.AccountVar.Account.Name,
 	Website: 'http://acme.org',
 	Phone : vars.AccountVar.Account.Phone
