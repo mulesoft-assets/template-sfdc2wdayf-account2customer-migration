@@ -77,7 +77,7 @@ output application/java
 ---
 Account : {
 	Id: '0010J00001zJT99QAG',
-	Phone: '100' ++ randomInt(100000),
+	Phone: p('test.wdayf.phone'),
 	Name: "Test_AccToInsert_account-migration_" ++ uuid()
 }
 ]]></ee:set-variable>
