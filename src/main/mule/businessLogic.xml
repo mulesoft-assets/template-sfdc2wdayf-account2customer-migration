@@ -41,7 +41,7 @@ ns ns0 urn:com.workday/bsvc
 }]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-					<workday:revenue-management doc:name="Revenue management - Get Customers" doc:id="acf9fa0c-bb76-4c54-ac5a-28121d247e43" config-ref="Workday_Config_version_30" target="getCustomerResponse" operation="Get_Customers">
+					<workday:revenue-management doc:name="Revenue management - Get Customers" doc:id="acf9fa0c-bb76-4c54-ac5a-28121d247e43" config-ref="Workday_Config" target="getCustomerResponse" operation="Get_Customers">
 						<ee:repeatable-file-store-stream inMemorySize="2048" />
 						<workday:content ><![CDATA[#[vars.getCustomerRequest]]]></workday:content>
 					</workday:revenue-management>
@@ -150,7 +150,7 @@ fun stateMapping(salesforceState) =
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<workday:revenue-management operation="Submit_Customer" doc:name="Revenue management - Submit Customer" doc:id="fe94fcc8-58f4-4adb-9197-277a1dc4ec19" config-ref="Workday_Config_version_30"/>
+					<workday:revenue-management operation="Submit_Customer" doc:name="Revenue management - Submit Customer" doc:id="fe94fcc8-58f4-4adb-9197-277a1dc4ec19" config-ref="Workday_Config"/>
             </batch:step>
         </batch:process-records>
         <batch:on-complete >

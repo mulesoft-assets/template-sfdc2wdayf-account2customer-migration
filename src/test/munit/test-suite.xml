@@ -48,7 +48,7 @@ ns ns0 urn:com.workday/bsvc
 }]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-					<workday:revenue-management doc:name="Revenue management - Get Customers" config-ref="Workday_Config_version_30" operation="Get_Customers">
+					<workday:revenue-management doc:name="Revenue management - Get Customers" config-ref="Workday_Config" operation="Get_Customers">
 						<ee:repeatable-file-store-stream inMemorySize="2048" />
 						<workday:content ><![CDATA[#[vars.getCustomerRequest]]]></workday:content>
 					</workday:revenue-management>
@@ -63,8 +63,8 @@ payload]]></ee:set-payload>
 		
 </munit:execution>
 		<munit:validation >
-			<munit-tools:assert-that doc:name="Assert that" doc:id="7b925592-bb91-44bd-8b1c-924631fdcc36" expression="#[payload.Get_Customers_Response.Response_Data.Customer.Customer_Data.Customer_Name]" is="#[MunitTools::equalTo(vars.AccountVar.Account.Name)]"/>
-			<munit-tools:assert-that doc:name="Assert that" doc:id="a6388fd1-e35a-4fbc-96cc-7cd8be2e805d" expression="#[payload.Get_Customers_Response.Response_Data.Customer.Customer_Data.Business_Entity_Data.Contact_Data.Phone_Data.Phone_Number]" is="#[MunitTools::equalTo(vars.AccountVar.Account.Phone)]"/>
+			<munit-tools:assert-that doc:name="Assert that Customer Name is correct" doc:id="7b925592-bb91-44bd-8b1c-924631fdcc36" expression="#[payload.Get_Customers_Response.Response_Data.Customer.Customer_Data.Customer_Name]" is="#[MunitTools::equalTo(vars.AccountVar.Account.Name)]" message="Customer Name isn't correct"/>
+			<munit-tools:assert-that doc:name="Assert that Phone number is correct" doc:id="a6388fd1-e35a-4fbc-96cc-7cd8be2e805d" expression="#[payload.Get_Customers_Response.Response_Data.Customer.Customer_Data.Business_Entity_Data.Contact_Data.Phone_Data.Phone_Number]" is="#[MunitTools::equalTo(vars.AccountVar.Account.Phone)]" message="Phone number isn't correct"/>
 		</munit:validation>
 	</munit:test>
 	<sub-flow name="prepareDynamicDataInput" doc:id="2f86f4ba-02c9-4871-b5dc-082605d3a90b">
