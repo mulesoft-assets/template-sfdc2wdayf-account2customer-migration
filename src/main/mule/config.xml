@@ -2,22 +2,26 @@
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:workday="http://www.mulesoft.org/schema/mule/workday" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/workday/current/mule-workday.xsd">
 
 	<global-property doc:name="Global Property" name="mule.env" value="dev" />
-	<http:listener-config name="HTTP_Listener_config" doc:id="910654bf-9fd9-4073-bad4-cf951b7f0022" doc:name="HTTP Listener config">
+    <configuration-properties file="common.properties" doc:id="087bd1ec-6737-445b-a33c-752fd83dcd7f" doc:name="Configuration properties" />
+    <configuration-properties file="mule.${mule.env}.properties" doc:id="d82f4e99-3d8c-4fd7-a096-a0cee38a6310" doc:name="Configuration properties" />
+	
+    <http:listener-config name="HTTP_Listener_config" doc:id="910654bf-9fd9-4073-bad4-cf951b7f0022" doc:name="HTTP Listener config">
 		<http:listener-connection host="0.0.0.0" port="${http.port}" />
 	</http:listener-config>
-	<email:smtp-config name="Gmail_SMTP" doc:id="8ba14ccd-a5b8-43a8-8281-cd433c852f2b" doc:name="Email SMTP">
+	
+    <email:smtp-config name="Gmail_SMTP" doc:id="8ba14ccd-a5b8-43a8-8281-cd433c852f2b" doc:name="Email SMTP">
 		<email:smtps-connection host="${smtp.host}" password="${smtp.password}" port="${smtp.port}" tlsContext="TLS_Context" user="${smtp.user}" />
 	</email:smtp-config>
-	<tls:context name="TLS_Context" doc:id="233e532c-8296-4ddd-ac67-e2b7984b3609" doc:name="TLS Context">
+	
+    <tls:context name="TLS_Context" doc:id="233e532c-8296-4ddd-ac67-e2b7984b3609" doc:name="TLS Context">
 		<tls:trust-store insecure="true" />
 	</tls:context>
-	<configuration-properties file="mule-artifact.properties" doc:id="46877740-aac5-4812-8728-4718689aa9ec" doc:name="Configuration properties" />
-	<configuration-properties file="common.properties" doc:id="dffa4da7-cc5c-4ecb-922e-1115b4387354" doc:name="Configuration properties" />
-	<configuration-properties file="mule.${mule.env}.properties" doc:id="674beef8-9485-40a7-99b9-0685c9b7e863" doc:name="Configuration properties" />
+
 	<salesforce:sfdc-config name="Salesforce_Config" doc:id="12783a85-a403-4e74-834e-da971ecb68aa" doc:name="Salesforce Config">
 		<salesforce:basic-connection password="${sfdc.password}" securityToken="${sfdc.securityToken}" username="${sfdc.username}" />
 	</salesforce:sfdc-config>
-	<workday:config-version-30-config name="Workday_Config_version_30" doc:name="Workday Config version 30" doc:id="df40f1d9-2233-4940-9ab1-df00b6ad775d" >
-		<workday:basic-authentication-api-v30-connection username="${wday.username}" password="${wday.password}" tenantName="${wday.tenant}" hostName="${wday.host}" responseTimeout="${wday.responseTimeout}"/>
-	</workday:config-version-30-config>
+    
+	<workday:config-version-32-config name="Workday_Config" doc:name="Workday Config version 32" doc:id="4d28fd35-a648-40b2-8566-cabf5a65e069" >
+		<workday:basic-authentication-api-v32-connection userName="${wday.username}" password="${wday.password}" tenantName="${wday.tenant}" hostName="${wday.host}" />
+	</workday:config-version-32-config>
 </mule>

@@ -41,10 +41,11 @@ ns ns0 urn:com.workday/bsvc
 }]]></ee:set-variable>
 						</ee:variables>
 					</ee:transform>
-					<workday:revenue-management doc:name="Revenue management - Get Customers" doc:id="acf9fa0c-bb76-4c54-ac5a-28121d247e43" config-ref="Workday_Config_version_30" target="getCustomerResponse" operation="Get_Customers">
+					<workday:revenue-management doc:name="Revenue management - Get Customers" doc:id="acf9fa0c-bb76-4c54-ac5a-28121d247e43" config-ref="Workday_Config" target="getCustomerResponse" operation="Get_Customers">
 						<ee:repeatable-file-store-stream inMemorySize="2048" />
 						<workday:content ><![CDATA[#[vars.getCustomerRequest]]]></workday:content>
 					</workday:revenue-management>
+					<logger level="INFO" doc:name="Log Workday Customer" doc:id="c180d54a-ac3f-4490-8f51-eebbf045d39f" message="Workday Customer: #[output application/json --- vars.getCustomerResponse]"/>
 					<ee:transform doc:name="Prepare Workday Customer Reference" doc:id="0e44967e-228c-48ab-a08d-cf1036662e9e" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
@@ -104,12 +105,12 @@ fun stateMapping(salesforceState) =
 				ns0#Contact_Data: {
 					ns0#Address_Data: {
 						ns0#Country_Reference: {
-							ns0#ID @(ns0#"type": "ISO_3166-1_Alpha-3_Code"): countryMapping(payload.BillingAddress.country) default p('wdayf.country')
+							ns0#ID @(ns0#"type": "ISO_3166-1_Alpha-3_Code"): countryMapping(payload.BillingAddress.country)
 						},
 						ns0#Address_Line_Data @(ns0#Type: "ADDRESS_LINE_1"): payload.BillingAddress.street default p('wdayf.street'),
 						ns0#Municipality: payload.BillingAddress.city default p('wdayf.city'),
 						ns0#Country_Region_Reference: {
-							ns0#ID @(ns0#"type": "Country_Region_ID"): stateMapping(payload.BillingAddress.state).workdayState default p('wdayf.state')
+							ns0#ID @(ns0#"type": "Country_Region_ID"): stateMapping(payload.BillingAddress.state).workdayState
 						},
 						ns0#Postal_Code: payload.BillingAddress.postalCode default p('wdayf.postalCode'),
 						ns0#Usage_Data @(ns0#Public: false): {
@@ -122,6 +123,7 @@ fun stateMapping(salesforceState) =
 					},
 					ns0#Phone_Data: {
 						ns0#Phone_Number: payload.Phone default p('wdayf.phone'),
+						ns0#Country_ISO_Code : countryMapping(payload.BillingAddress.country),
 						ns0#Phone_Device_Type_Reference: {
 							ns0#ID @(ns0#"type": "Phone_Device_Type_ID"): "1063.5"
 						},
@@ -150,7 +152,8 @@ fun stateMapping(salesforceState) =
 }]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<workday:revenue-management operation="Submit_Customer" doc:name="Revenue management - Submit Customer" doc:id="fe94fcc8-58f4-4adb-9197-277a1dc4ec19" config-ref="Workday_Config_version_30"/>
+					<workday:revenue-management operation="Submit_Customer" doc:name="Revenue management - Submit Customer" doc:id="fe94fcc8-58f4-4adb-9197-277a1dc4ec19" config-ref="Workday_Config"/>
+					<logger level="INFO" doc:name="Log response" doc:id="328ff24b-bba3-4d60-b5c2-273f35bbec86" message="Workday response: #[output application/json --- payload]"/>
             </batch:step>
         </batch:process-records>
         <batch:on-complete >
